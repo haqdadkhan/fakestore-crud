@@ -1,21 +1,47 @@
 // grid elem
 const grid = document.querySelector(".grid");
-
 // api url
-const url = "https://ca0bd1c27eb6a7ed2324.free.beeceptor.com/api/users/";
+////const url = "https://cacbaca778004faab3e8.free.beeceptor.com/api/users/";
+const url = "https://fakestoreapi.com/products";
+
+// Modal elements
+const editId = document.getElementById("editId");
+const editModal = document.getElementById("editModal");
+const editTitle = document.getElementById("editTitle")
+const editPrice = document.getElementById("editPrice")
+const editCategory = document.getElementById("editCategory")
+const editImage = document.getElementById("editImage")
+const editDescription = document.getElementById("editDescription")
+
+// open modal
+function openModal(product) {
+    editModal.classList.remove("hidden")
+
+    editId.value = product.dataset.id;
+    editTitle.value = product.dataset.title;
+    editPrice.value = product.dataset.price;
+    editCategory.value = product.dataset.category;
+    editImage.value = product.dataset.image;
+    editDescription.value = product.dataset.description;
+}
+
+// close modal
+function closeModal() {
+    editModal.classList.add("hidden");
+}
 
 // --- GET REQUEST ---
 async function fetchProducts() {
     try {
+        console.log("Getting the products...")
         const res = await fetch(url);
-
         // guard clause
         if (!res.ok) {
             console.log("issue with GET request:-", res.status);
             return;
         }
-        const products = await res.json();
 
+        const products = await res.json();
         console.log("Fetched:-", products);
 
         // clearing the grid
@@ -67,6 +93,14 @@ async function fetchProducts() {
 
                     <!-- Edit Button -->
                     <button
+                        data-id="${product.id}"
+                        data-title="${product.title}"
+                        data-price="${product.price}"
+                        data-category="${product.category}"
+                        data-image="${product.image}"
+                        data-description="${product.description}"
+                        onclick="openModal(this)"
+
                         class="edit-btn absolute top-2 right-2 bg-indigo-100 text-indigo-600 p-2 rounded-full hover:bg-indigo-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -89,32 +123,71 @@ fetchProducts();
 
 
 // --- POST REQUEST ---
-product = {
-    title: "Red Chillies",
-    price: 0.1,
-    description: "These chillies are red, and gives spicy taste.",
-    category: "Vegetables",
-    image: "https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2t.png",
-    // "https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_t.png"
-    rating: {
-        rate: 4.5,
-        count: 42
-    },
-}
+// product = {
+//     title: "Red Chillies",
+//     price: 0.1,
+//     description: "These chillies are red, and gives spicy taste.",
+//     category: "Vegetables",
+//     image: "https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2t.png",
+//     // "https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_t.png"
+//     rating: {
+//         rate: 4.5,
+//         count: 42
+//     },
+// }
 
-async function addProduct() {
-    const res = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(product)
-    })
+// async function addProduct() {
+//     const res = await fetch(url, {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify(product)
+//     })
 
-    if (!res.ok) {
-        console.log("issue with POST request:-", res)
-        return
+//     if (!res.ok) {
+//         console.log("issue with POST request:-", res)
+//         return
+//     }
+//     const newProduct = await res.json();
+//     console.log("Product created:-", newProduct);
+// }
+
+
+// --- PUT REQUEST ---
+editForm.addEventListener("submit", async function updateProduct(e) {
+    e.preventDefault();
+
+    const productValue = {
+        title: editTitle.value,
+        price: editPrice.value,
+        category: editCategory.value,
+        image: editImage.value,
+        description: editDescription.value,
+    };
+
+    try {
+        console.log("Updating the product...")
+        const res = await fetch(`${url}/${editId.value}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(productValue)
+        })
+
+        // guard clause
+        if (!res.ok) {
+            console.log("issue with PUT request:-", res);
+            return;
+        }
+
+        const updatedProduct = await res.json();
+        console.log("Updated product:-", updatedProduct)
+    } catch (error) {
+        console.log("Error updating data:-", error)
     }
-    const newProduct = await res.json();
-    console.log("Product created:-", newProduct);
-}
+
+    // calling to close the update modal
+    closeModal()
+})
