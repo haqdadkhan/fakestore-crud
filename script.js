@@ -1,21 +1,38 @@
 // grid elem
 const grid = document.querySelector(".grid");
+
 // api url
-////const url = "https://cacbaca778004faab3e8.free.beeceptor.com/api/users/";
-const url = "https://fakestoreapi.com/products";
+const X_MASTER_KEY = "$2a$10$65sSZHRQj2MnXDJh1QMONOtEEnKqxPbRxi/VAkz4.Z2S4MjMvR0KC";
+const BIN_ID = "68a321d943b1c97be92188ed";
+const url = "https://api.jsonbin.io/v3/b";
 
-// Modal elements
+// Add Modal elements
+const prodAddModal = document.getElementById("prodAddModal");
+const addId = document.getElementById("addId");
+const addTitle = document.getElementById("addTitle");
+const addPrice = document.getElementById("addPrice");
+const addCategory = document.getElementById("addCategory");
+const addImage = document.getElementById("addImage");
+const addDescription = document.getElementById("addDescription");
+
+// Edit Modal elements
+const prodEditModal = document.getElementById("prodEditModal");
 const editId = document.getElementById("editId");
-const editModal = document.getElementById("editModal");
-const editTitle = document.getElementById("editTitle")
-const editPrice = document.getElementById("editPrice")
-const editCategory = document.getElementById("editCategory")
-const editImage = document.getElementById("editImage")
-const editDescription = document.getElementById("editDescription")
+const editTitle = document.getElementById("editTitle");
+const editPrice = document.getElementById("editPrice");
+const editCategory = document.getElementById("editCategory");
+const editImage = document.getElementById("editImage");
+const editDescription = document.getElementById("editDescription");
 
-// open modal
-function openModal(product) {
-    editModal.classList.remove("hidden")
+// open add modal
+function addProdModal() {
+    prodAddModal.classList.remove("hidden");
+
+}
+
+// open edit modal
+function editProdModal(product) {
+    prodEditModal.classList.remove("hidden");
 
     editId.value = product.dataset.id;
     editTitle.value = product.dataset.title;
@@ -27,25 +44,51 @@ function openModal(product) {
 
 // close modal
 function closeModal() {
-    editModal.classList.add("hidden");
+    prodEditModal.classList.add("hidden");
+    prodAddModal.classList.add("hidden");
 }
 
-// --- GET REQUEST ---
+// --- Manual POST REQUEST ---
+// async function postData() {
+//     const fetchData = await fetch('https://fakestoreapi.com/products')
+//     const finalData = await fetchData.json()
+//     console.log("Final Data:-", finalData)
+
+//     const postData = await fetch(`${url}/${BIN_ID}`, {
+//         method: "PUT",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "X-MASTER-KEY": X_MASTER_KEY,
+//         },
+//         body: JSON.stringify(finalData)
+//     })
+
+//     console.log("Posted Data:-", postData)
+// }
+
+
+// --- READ REQUEST --- (fetch from JSONBin)
 async function fetchProducts() {
     try {
-        console.log("Getting the products...")
-        const res = await fetch(url);
-        // guard clause
-        if (!res.ok) {
-            console.log("issue with GET request:-", res.status);
+        const getRes = await fetch(`${url}/${BIN_ID}/latest`, {
+            method: "GET",
+            headers: {
+                "X-Master-Key": X_MASTER_KEY
+            }
+        });
+
+        if (!getRes.ok) {
+            console.log("issue with GET request:-", getRes.status);
             return;
         }
 
-        const products = await res.json();
-        console.log("Fetched:-", products);
+        const data = await getRes.json();
+        const products = data.record;
+        console.log("Fetched from JSONBin:-", products);
 
         // clearing the grid
         grid.innerHTML = "";
+
         products.forEach(product => {
             const productHTML =
                 `
@@ -65,7 +108,7 @@ async function fetchProducts() {
                         </div>
 
                         <div class="text-sm mb-2">
-                        ⭐ ${product.rating.rate}/5 <span class="text-gray-500">(${product.rating.count} ratings)</span>
+                        ⭐ ${product.rating?.rate || 0}/5 <span class="text-gray-500">(${product.rating?.count || 0} ratings)</span>
                         </div>
 
                         <div class="mb-2">
@@ -99,8 +142,7 @@ async function fetchProducts() {
                         data-category="${product.category}"
                         data-image="${product.image}"
                         data-description="${product.description}"
-                        onclick="openModal(this)"
-
+                        onclick="editProdModal(this)"
                         class="edit-btn absolute top-2 right-2 bg-indigo-100 text-indigo-600 p-2 rounded-full hover:bg-indigo-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -109,56 +151,22 @@ async function fetchProducts() {
                         </svg>
                     </button>
                 </div>
-                `
-            // appending multiple products
+                `;
             grid.innerHTML += productHTML;
-        })
+        });
 
     } catch (error) {
         console.log("Error Fetching products:-", error);
     }
 }
-
 fetchProducts();
 
-
-// --- POST REQUEST ---
-// product = {
-//     title: "Red Chillies",
-//     price: 0.1,
-//     description: "These chillies are red, and gives spicy taste.",
-//     category: "Vegetables",
-//     image: "https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2t.png",
-//     // "https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_t.png"
-//     rating: {
-//         rate: 4.5,
-//         count: 42
-//     },
-// }
-
-// async function addProduct() {
-//     const res = await fetch(url, {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json"
-//         },
-//         body: JSON.stringify(product)
-//     })
-
-//     if (!res.ok) {
-//         console.log("issue with POST request:-", res)
-//         return
-//     }
-//     const newProduct = await res.json();
-//     console.log("Product created:-", newProduct);
-// }
-
-
-// --- PUT REQUEST ---
+// --- UPDATE REQUEST ---
 editForm.addEventListener("submit", async function updateProduct(e) {
     e.preventDefault();
 
     const productValue = {
+        id: parseInt(editId.value),
         title: editTitle.value,
         price: editPrice.value,
         category: editCategory.value,
@@ -167,27 +175,57 @@ editForm.addEventListener("submit", async function updateProduct(e) {
     };
 
     try {
-        console.log("Updating the product...")
-        const res = await fetch(`${url}/${editId.value}`, {
-            method: "PUT",
+        // 1. Fetch latest products
+        const res = await fetch(`${url}/${BIN_ID}/latest`, {
+            method: "GET",
             headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(productValue)
-        })
+                "X-MASTER-KEY": X_MASTER_KEY
+            }
+        });
 
-        // guard clause
         if (!res.ok) {
-            console.log("issue with PUT request:-", res);
+            console.log("Error finding product:-", res.status);
             return;
         }
 
-        const updatedProduct = await res.json();
-        console.log("Updated product:-", updatedProduct)
-    } catch (error) {
-        console.log("Error updating data:-", error)
-    }
+        const data = await res.json();
+        const products = data.record;
 
-    // calling to close the update modal
-    closeModal()
-})
+        // 2. Find the product by ID and Update
+        const index = products.findIndex(p => p.id == productValue.id);
+        if (index !== -1) {
+            products[index] = { ...products[index], ...productValue };
+        } else {
+            console.log("Product not found for update...");
+            return;
+        }
+
+        // 3. save the Array back to JSONBin
+        const updateRes = await fetch(`${url}/${BIN_ID}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-MASTER-KEY": X_MASTER_KEY,
+            },
+            body: JSON.stringify(products)
+        });
+
+        console.log("update is running...");
+
+        if (!updateRes.ok) {
+            console.log("issue with PUT request:-", updateRes);
+            return;
+        }
+
+        console.log("Updating the product...")
+
+        const updatedProduct = await updateRes.json();
+        console.log("Updated product:-", products[index]);
+
+        // closing modal
+        closeModal();
+        fetchProducts();
+    } catch (error) {
+        console.log("Error updating data:-", error);
+    }
+});

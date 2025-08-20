@@ -22,7 +22,7 @@
                 </h1>
                 <p class="text-md text-indigo-100 mt-1">Discover amazing products</p>
             </div>
-            <button onclick="openModal()"
+            <button onclick="addProdModal()"
                 class="flex mr-2 md:mr-4 bg-white text-sm md:text-md text-indigo-600 px-2 md:px-4 py-2 rounded shadow hover:bg-indigo-100">
                 ➕ Add Product
             </button>
@@ -90,8 +90,8 @@
         </div>
     </main>
 
-    <!-- Edit Modal -->
-    <div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <!-- Edit Product Modal -->
+    <div id="prodEditModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Edit Product</h2>
             <form id="editForm" class="space-y-4">
@@ -130,9 +130,58 @@
                         class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
                         Cancel
                     </button>
-                    <button onsubmit="updateProduct()" type="submit"
+                    <button type="submit"
                         class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
                         Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Product Modal  -->
+    <div id="prodAddModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Add Product</h2>
+            <form id="addForm" class="space-y-4">
+                <input type="hidden" id="addId" />
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Title</label>
+                    <input id="addTitle" type="text" class="w-full text-sm text-gray-600 border border-indigo-200 rounded px-3 py-2 mt-1 outline-none" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Price</label>
+                    <input id="addPrice" type="number" step="0.01" class="w-full text-sm text-gray-600 border border-indigo-200 rounded px-3 py-2 mt-1 outline-none"
+                        required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Category</label>
+                    <input id="addCategory" type="text" class="w-full text-sm text-gray-600 border border-indigo-200 rounded px-3 py-2 mt-1 outline-none"
+                        required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Image URL</label>
+                    <input id="addImage" type="url" class="w-full text-sm text-gray-600 border border-indigo-200 rounded px-3 py-2 mt-1 outline-none" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="addDescription" rows="3" class="w-full text-sm text-gray-600 border border-indigo-200 rounded px-3 py-2 mt-1 outline-none"
+                        required></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        Save Product
                     </button>
                 </div>
             </form>
