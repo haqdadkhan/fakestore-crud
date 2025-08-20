@@ -66,7 +66,6 @@ function closeModal() {
 //     console.log("Posted Data:-", postData)
 // }
 
-
 // --- READ REQUEST --- (fetch from JSONBin)
 async function fetchProducts() {
     try {
@@ -210,8 +209,6 @@ editForm.addEventListener("submit", async function updateProduct(e) {
             body: JSON.stringify(products)
         });
 
-        console.log("update is running...");
-
         if (!updateRes.ok) {
             console.log("issue with PUT request:-", updateRes);
             return;
@@ -229,3 +226,65 @@ editForm.addEventListener("submit", async function updateProduct(e) {
         console.log("Error updating data:-", error);
     }
 });
+
+// --- CREATE REQUEST ---
+addForm.addEventListener("submit", async function addProduct(e) {
+    e.preventDefault();
+
+    const newProduct = {
+        id: Date.now(),
+        title: addTitle.value,
+        price: addPrice.value,
+        category: addCategory.value,
+        image: addImage.value,
+        description: addDescription.value,
+        rating: {
+            rate: (Math.random() * 5).toFixed(1),
+            count: Math.floor(Math.random() * 500) + 1
+        }
+    }
+
+    try {
+        // 1. Fetch latest products
+        const res = await fetch(`${url}/${BIN_ID}/latest`, {
+            method: "GET",
+            headers: {
+                "X-MASTER-KEY": X_MASTER_KEY,
+            }
+        })
+
+        if (!res.ok) {
+            console.log("Error getting Products:-", res.status)
+            return
+        }
+
+        const data = await res.json();
+        const products = data.record;
+
+        // 2. Push new Product
+        products.push(newProduct)
+
+        // 3. save the Array back to JSONBin
+        const addRes = await fetch(`${url}/${BIN_ID}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-MASTER-KEY": X_MASTER_KEY,
+            },
+            body: JSON.stringify(products)
+        })
+
+        if (!addRes.ok) {
+            console.log("Error creating Products:-", addRes)
+            return
+        }
+        console.log("Product added successfully:-", newProduct)
+
+        closeModal();
+        fetchProducts();
+        addForm.reset();
+
+    } catch (error) {
+        console.log("Error creating Product:-", error)
+    }
+})
