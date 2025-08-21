@@ -19,11 +19,11 @@
      right: -10px;
  }
 
- .edit-btn {
+ .edit-btn, .delete-btn {
      transition: all 0.2s ease;
      opacity: 0;
  }
 
- .product-card:hover .edit-btn {
+ .product-card:hover .edit-btn,.product-card:hover .delete-btn {
      opacity: 1;
  }

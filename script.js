@@ -1,5 +1,6 @@
 // grid elem
 const grid = document.querySelector(".grid");
+const delElem = document.querySelector(".delete")
 
 // api url
 const X_MASTER_KEY = "$2a$10$65sSZHRQj2MnXDJh1QMONOtEEnKqxPbRxi/VAkz4.Z2S4MjMvR0KC";
@@ -72,7 +73,7 @@ async function fetchProducts() {
         const getRes = await fetch(`${url}/${BIN_ID}/latest`, {
             method: "GET",
             headers: {
-                "X-Master-Key": X_MASTER_KEY
+                "X-MASTER-KEY": X_MASTER_KEY
             }
         });
 
@@ -132,6 +133,16 @@ async function fetchProducts() {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Delete Button -->
+                    <button
+                        onclick="delProduct(${product.id})"
+                        class="delete-btn absolute top-2 left-2 bg-red-100 text-red-600 p-2 rounded-full hover:bg-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
 
                     <!-- Edit Button -->
                     <button
@@ -254,7 +265,7 @@ addForm.addEventListener("submit", async function addProduct(e) {
         })
 
         if (!res.ok) {
-            console.log("Error getting Products:-", res.status)
+            console.log("Issue with GET request:-", res.status)
             return
         }
 
@@ -275,7 +286,7 @@ addForm.addEventListener("submit", async function addProduct(e) {
         })
 
         if (!addRes.ok) {
-            console.log("Error creating Products:-", addRes)
+            console.log("Issue with CREATE request:-", addRes)
             return
         }
         console.log("Product added successfully:-", newProduct)
@@ -288,3 +299,41 @@ addForm.addEventListener("submit", async function addProduct(e) {
         console.log("Error creating Product:-", error)
     }
 })
+// --- DELETE REQUEST ---
+async function delProduct(id) {
+    try {
+        // 1. Fetch all products
+        const res = await fetch(`${url}/${BIN_ID}/latest`, {
+            method: "GET",
+            headers: {
+                "X-Master-Key": X_MASTER_KEY,
+            }
+        });
+
+        const data = await res.json();
+        let products = data.record;
+
+        // 2. Remove the product
+        products = products.filter(p => p.id !== id);
+
+        // 3. Update products back to bin
+        const putRes = await fetch(`${url}/${BIN_ID}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": X_MASTER_KEY,
+            },
+            body: JSON.stringify(products)
+        });
+
+        if (!putRes.ok) {
+            console.log("Issue with DELETE request:-", putRes);
+            return;
+        }
+
+        console.log(`Deleted product with id ${id}`);
+        fetchProducts();
+    } catch (error) {
+        console.log("Error deleting product:-", error);
+    }
+}
